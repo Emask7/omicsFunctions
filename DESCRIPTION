@@ -1,0 +1,14 @@
+Package: SIVomics
+Type: Package
+Title: SIV in vivo Transcriptomics Analyses
+Version: 0.1.0
+Author: Emma Mask
+Maintainer: Emma Mask <emask@txbiomed.org>
+Description: This package is a wrapper for analyses of SIV in vivo transcriptomics data using the edgeR and DESeq2 packages.
+License: 
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    edgeR,
+    DESeq2,
+    dplyr
