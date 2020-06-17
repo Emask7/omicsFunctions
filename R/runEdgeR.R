@@ -39,7 +39,7 @@ runEdgeR <- function(geneCounts, minCount = 5, normMethod = "TMM", showPlots = F
       rownames(lrt$table), lrt$table$logFC,
       p.adjust(lrt$table$PValue, method = "fdr")
     )
-    colnames(lrtRes) <- c("Gene_ID", "LFC", "FDR")
+    colnames(lrtRes) <- c("Gene_ID", "LFC", "padj")
     lrtSummary <- summary(decideTests(lrt, adjust.method = "fdr", lfc = 1))
 
   # DE above a FC threshold: GLM approach -------------------------------------
@@ -48,7 +48,7 @@ runEdgeR <- function(geneCounts, minCount = 5, normMethod = "TMM", showPlots = F
       rownames(lrtTreat$table), lrtTreat$table$logFC,
       p.adjust(lrtTreat$table$PValue, method = "fdr")
     )
-    colnames(lrtTreatRes) <- c("Gene_ID", "LFC", "FDR")
+    colnames(lrtTreatRes) <- c("Gene_ID", "LFC", "padj")
     lrtTreatSummary <- summary(
       decideTests(lrtTreat, adjust.method = "fdr", lfc = 1)
     )
@@ -67,7 +67,7 @@ runEdgeR <- function(geneCounts, minCount = 5, normMethod = "TMM", showPlots = F
     colnames(summary_all) <- c("LRT", "LRT + TREAT")
 
   # Return a list object with all of the data ---------------------------------
-    filt <- function(x) subset(x, abs(x$LFC) >= 1 & x$FDR <= 0.05)
+    filt <- function(x) subset(x, abs(x$LFC) >= 1 & x$padj <= 0.05)
 
     list(
       summary = summary_all,
