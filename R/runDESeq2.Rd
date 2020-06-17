@@ -2,5 +2,5 @@
 \alias{runDESeq2}
 \title{DESeq2 wrapper}
 \usage{
-  runDESeq2(geneCounts)
+  runDESeq2(geneCounts, orthoList)
 }

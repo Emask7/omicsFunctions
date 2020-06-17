@@ -2,11 +2,12 @@
 #'
 #' @description
 #' @param geneCounts A data frame containing 6 columns of raw gene counts.
+#' @param orthoList A data frame containing two columns (Gene_ID and Human_Gene_ID)
 #' @export
 #' @examples
 #' runDESeq2()
 
-runDESeq2 <- function(geneCounts) {
+runDESeq2 <- function(geneCounts, orthoList) {
   # Specify experimental design factors ---------------------------------------
     animal <- factor(c(rep(c("15979", "30760", "31151"), 2)))
     timepoint <- factor(c(rep("T-7", 3), rep("T15", 3)))
@@ -27,6 +28,7 @@ runDESeq2 <- function(geneCounts) {
     # waldSummary <- summary(waldRes, alpha = 0.05)
     waldRes <- data.frame(rownames(waldRes), waldRes[, c(2, 6)])
     colnames(waldRes) <- c("Gene_ID", "LFC", "padj")
+    waldRes <- convertIDs(waldRes, orthoList)
 
   # Wald test with LFC shrinkage ----------------------------------------------
     shrinkRes <- lfcShrink(
@@ -35,6 +37,7 @@ runDESeq2 <- function(geneCounts) {
     # shrinkSummary <- summary(shrinkRes, alpha = 0.05)
     shrinkRes <- data.frame(rownames(shrinkRes), shrinkRes[, c(2, 4)])
     colnames(shrinkRes) <- c("Gene_ID", "LFC", "padj")
+    shrinkRes <- convertIDs(shrinkRes, orthoList)
 
 
   # Return a list object with all of the data ---------------------------------

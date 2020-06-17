@@ -2,6 +2,7 @@
 #'
 #' @description
 #' @param geneCounts A data frame containing 6 columns of raw gene counts.
+#' @param orthoList A data frame containing two columns (Gene_ID and Human_Gene_ID)
 #' @param minCount numberic. The minimum number of reads required for at least some samples. By default, minCount is set to 5.
 #' @param normMethod The normalization method to be used for analysis. Options are "TMM", "TMMwsp", "RLE", "UQ", or "none". By default, this is set to "TMM".
 #' @param showPlots logical. If TRUE, plots are shown. If FALSE, plots are not shown. By default, this is set to FALSE.
@@ -9,7 +10,7 @@
 #' @examples
 #' runEdgeR()
 
-runEdgeR <- function(geneCounts, minCount = 5, normMethod = "TMM", showPlots = FALSE) {
+runEdgeR <- function(geneCounts, orthoList, minCount = 5, normMethod = "TMM", showPlots = FALSE) {
   # Specify experimental design factors ---------------------------------------
     animal <- factor(c(rep(c("15979", "30760", "31151"), 2)))
     timepoint <- factor(c(rep("T-7", 3), rep("T15", 3)))
@@ -40,6 +41,7 @@ runEdgeR <- function(geneCounts, minCount = 5, normMethod = "TMM", showPlots = F
       p.adjust(lrt$table$PValue, method = "fdr")
     )
     colnames(lrtRes) <- c("Gene_ID", "LFC", "padj")
+    lrtRes <- convertIDs(lrtRes, orthoList)
     lrtSummary <- summary(decideTests(lrt, adjust.method = "fdr", lfc = 1))
 
   # DE above a FC threshold: GLM approach -------------------------------------
@@ -49,6 +51,7 @@ runEdgeR <- function(geneCounts, minCount = 5, normMethod = "TMM", showPlots = F
       p.adjust(lrtTreat$table$PValue, method = "fdr")
     )
     colnames(lrtTreatRes) <- c("Gene_ID", "LFC", "padj")
+    lrtTreatRes <- convertIDs(lrtTreatRes, orthoList)
     lrtTreatSummary <- summary(
       decideTests(lrtTreat, adjust.method = "fdr", lfc = 1)
     )

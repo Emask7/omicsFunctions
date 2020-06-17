@@ -2,5 +2,5 @@
 \alias{runEdgeR}
 \title{edgeR wrapper}
 \usage{
-runEdgeR(geneCounts, minCount = 5, normMethod = "TMM", showPlots = FALSE)
+runEdgeR(geneCounts, orthoList, minCount = 5, normMethod = "TMM", showPlots = FALSE)
 }
