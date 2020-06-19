@@ -3,19 +3,13 @@
 #' @description edgeR wrapper
 #' @param gene_counts A data frame containing 6 columns of raw gene counts.
 #' @param ortho_list A data frame containing two columns (Gene_ID and Human_Gene_ID)
-#' @param min_count numberic. The minimum number of reads required for at least some samples. By default, min_count is set to 5.
-#' @param norm_method The normalization method to be used for analysis. Options are "TMM", "TMMwsp", "RLE", "UQ", or "none". By default, this is set to "TMM".
-#' @param show_plots logical. If TRUE, plots are shown. If FALSE, plots are not shown. By default, this is set to FALSE.
+#' @param show_plots logical. If TRUE, plots are shown. If FALSE, plots are not shown.
 #' @import edgeR
 #' @export
 #' @examples
 #' run_edgeR(gene_counts, ortho_list)
 
-run_edgeR <- function(gene_counts,
-                     ortho_list,
-                     min_count = 5,
-                     norm_method = "TMM",
-                     show_plots) {
+run_edgeR <- function(gene_counts, ortho_list, show_plots) {
 
   # Specify experimental design factors ---------------------------------------
     animal <- factor(c(rep(c("15979", "30760", "31151"), 2)))
@@ -24,11 +18,11 @@ run_edgeR <- function(gene_counts,
 
   # Make a DGEList object from the raw count data and filter for low reads ----
     dgeList <- DGEList(counts = gene_counts, group = timepoint)
-    keep <- filterByExpr(dgeList, min.count = min_count)
+    keep <- filterByExpr(dgeList, min.count = 5)
     dgeList <- dgeList[keep, , keep.lib.sizes = FALSE]
 
   # Calculate normalization factors -------------------------------------------
-    dgeList <- calcNormFactors(dgeList, method = norm_method)
+    dgeList <- calcNormFactors(dgeList, method = "TMM")
 
   # Data exploration: multidimensional scaling plot ---------------------------
     if (show_plots) limma::plotMDS(dgeList, main = "MDS Plot")
@@ -39,46 +33,23 @@ run_edgeR <- function(gene_counts,
   # Data exploration: biological coefficient of variation plot ----------------
     if (show_plots) plotBCV(dgeList, main = "BCV Plot")
 
-  # DE testing: GLM approach --------------------------------------------------
+  # DE testing ----------------------------------------------------------------
     fit <- glmFit(dgeList, design)
-    lrt <- glmLRT(fit)
-    lrtRes <- data.frame(
-      rownames(lrt$table), lrt$table$logFC,
-      p.adjust(lrt$table$PValue, method = "fdr")
-    )
-    colnames(lrtRes) <- c("Gene_ID", "LFC", "padj")
-    lrtRes <- convert_IDs(lrtRes, ortho_list)
-    lrtSummary <- summary(
-      limma::decideTests(lrt, adjust.method = "fdr", lfc = 1)
-    )
-
-  # DE above a FC threshold: GLM approach -------------------------------------
     lrtTreat <- glmTreat(fit, lfc = 1, null = "interval")
-    lrtTreatRes <- data.frame(
+
+    res <- data.frame(
       rownames(lrtTreat$table), lrtTreat$table$logFC,
       p.adjust(lrtTreat$table$PValue, method = "fdr")
     )
-    colnames(lrtTreatRes) <- c("Gene_ID", "LFC", "padj")
-    lrtTreatRes <- convert_IDs(lrtTreatRes, ortho_list)
-    lrtTreatSummary <- summary(
-      limma::decideTests(lrtTreat, adjust.method = "fdr", lfc = 1)
-    )
+    colnames(res) <- c("Gene_ID", "LFC", "padj")
+    res <- convert_IDs(res, ortho_list)
 
   # Mean Difference Plots -----------------------------------------------------
-    if (show_plots) {
-      limma::plotMD(lrt, main = "Mean-Difference Plot - LRT")
-      limma::plotMD(lrtTreat, main = "Mean-Difference Plot - LRT with TREAT")
-    }
-
-  # Combine all summaries -----------------------------------------------------
-    summary_all <- data.frame(
-      lrtSummary[, 1], lrtTreatSummary[, 1],
-      row.names = c("Down", "NotSig", "Up")
-    )
-    colnames(summary_all) <- c("LRT", "LRT + TREAT")
+    if (show_plots) limma::plotMD(lrtTreat, main = "Mean-Difference Plot")
 
   # Return a list object with all of the data ---------------------------------
-    list(
-      summary = summary_all, LRT = lrtRes, LRT_TREAT = lrtTreatRes
+    DE_summary <- base::summary(
+      limma::decideTests(lrtTreat, adjust.method = "fdr", p.value = 0.05)
     )
+    list(results = res, summary = DE_summary)
 }

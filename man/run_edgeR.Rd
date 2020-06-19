@@ -4,24 +4,14 @@
 \alias{run_edgeR}
 \title{edgeR wrapper}
 \usage{
-run_edgeR(
-  gene_counts,
-  ortho_list,
-  min_count = 5,
-  norm_method = "TMM",
-  show_plots
-)
+run_edgeR(gene_counts, ortho_list, show_plots)
 }
 \arguments{
 \item{gene_counts}{A data frame containing 6 columns of raw gene counts.}
 
 \item{ortho_list}{A data frame containing two columns (Gene_ID and Human_Gene_ID)}
 
-\item{min_count}{numberic. The minimum number of reads required for at least some samples. By default, min_count is set to 5.}
-
-\item{norm_method}{The normalization method to be used for analysis. Options are "TMM", "TMMwsp", "RLE", "UQ", or "none". By default, this is set to "TMM".}
-
-\item{show_plots}{logical. If TRUE, plots are shown. If FALSE, plots are not shown. By default, this is set to FALSE.}
+\item{show_plots}{logical. If TRUE, plots are shown. If FALSE, plots are not shown.}
 }
 \description{
 edgeR wrapper

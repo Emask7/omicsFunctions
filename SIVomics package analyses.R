@@ -2,6 +2,10 @@ library(SIVomics)
 library(openxlsx)
 library(RDAVIDWebService)
 
+
+roxygen2::roxygenise()
+
+
 humanHomologs <- read.xlsx("biomart_export_human homologs_no duplicates.xlsx")
 head(humanHomologs)
 colnames(humanHomologs)
@@ -57,14 +61,14 @@ NK_bn_DESeq2 <- run_DESeq2(baboonCounts[, 13:18], humanHomologs)
 
 CD4T <- list(
   human = list(
-    
+
   )
 )
 
 
 
 david <- DAVIDWebService(
-  email = "emask@txbiomed.org", 
+  email = "emask@txbiomed.org",
   url = "https://david.ncifcrf.gov/webservice/services/DAVIDWebService.DAVIDWebServiceHttpSoap12Endpoint/"
 )
 
