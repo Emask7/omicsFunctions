@@ -17,19 +17,19 @@
 #' @examples
 #' run_DAVID(davidWS, list_name)
 
-run_DAVID <- function(davidWS, list_name, save_file = TRUE) {
-  run_functional_annotation <- function(annotation_cat, split_at) {
+run_DAVID <- function(davidWS, DE_data, list_name, save_file = TRUE) {
+  FA_helper <- function(annotation_cat, split_at) {
     setAnnotationCategories(davidWS, annotation_cat)
     FA_chart <- getFunctionalAnnotationChart(davidWS)
     FA_sub <- subset(
       FA_chart, FA_chart$FDR <= 0.05 & FA_chart$Fold.Enrichment >= 2
     )
 
-    if (nrow(FA_sub) <= 0) return(FALSE)
+    if (nrow(FA_sub) < 1) return(NULL)
 
     gene_list <- data.frame(FA_sub$Genes)
     for (r in 1:nrow(gene_list)) {
-      gene_names <- strsplit2(gene_list[r, 1], ", ")[1, ]
+      gene_names <- limma::strsplit2(gene_list[r, 1], ", ")[1, ]
       gene_names <- list(
         mapIds(
           org.Hs.eg.db, gene_names, keytype = "ENSEMBL", column = "SYMBOL"
@@ -49,7 +49,7 @@ run_DAVID <- function(davidWS, list_name, save_file = TRUE) {
         "Genes", "Fold.Enrichment", "FDR"
       )
     } else {
-      split_IDs <- strsplit2(FA_sub$Term, split_at)
+      split_IDs <- limma::strsplit2(FA_sub$Term, split_at)
       res <- data.frame(
         FA_sub$Category, split_IDs, FA_sub$Count, FA_sub$X.,
         gene_list, FA_sub$Fold.Enrichment, FA_sub$FDR
@@ -63,50 +63,82 @@ run_DAVID <- function(davidWS, list_name, save_file = TRUE) {
     res
   }
 
-  gene_lists <- getGeneListNames(davidWS)
-  list_position <- 0
-  for (x in 1:length(gene_lists)) {
-    if (gene_lists[x] == list_name) list_position <- x
-  }
-  if (list_position == 0) return(print("Error: not a valid gene list name"))
-  else {
-    setCurrentGeneListPosition(davidWS, list_position)
+  # Make sure input is valid --------------------------------------------------
+    cNames <- colnames(DE_data)
+    if (nrow(DE_data) < 1) {
+      print("Error: input has 0 rows", quote = FALSE)
+      return(NULL)
+    }
+    if (cNames[1] != "Gene_ID" | cNames[2] != "LFC" | cNames[3] != "padj") {
+      print("Error: input must have 3 columns (Gene_ID, LFC, and padj)")
+      return(NULL)
+    }
+    if (!is.connected(david)) {
+      print("Error: not connected to RDAVIDWebService", quote = FALSE)
+      return(NULL)
+    }
+
+
+  # Check to see if gene list has been added ----------------------------------
+    gene_lists <- getGeneListNames(davidWS)
+    list_position <- 0
+
+    if (length(getGeneListNames(davidWS)) > 0) {
+      for (x in 1:length(gene_lists)) {
+        if (gene_lists[x] == list_name) list_position <- x
+      }
+    }
+
+    if (list_position == 0) {
+      ensemblIDs <- mapIds(
+        org.Hs.eg.db, DE_data$Gene_ID,
+        keytype = "SYMBOL", column = "ENSEMBL"
+      )
+      addList(
+        davidWS, ensemblIDs, idType = "ENSEMBL_GENE_ID",
+        listName = list_name, listType = "Gene"
+      )
+    } else setCurrentGeneListPosition(davidWS, list_position)
+
+    gene_lists <- getGeneListNames(davidWS)
     print("Running GO analysis on gene list:")
     print(gene_lists[getCurrentGeneListPosition(davidWS)])
-  }
 
-  BP_chart <- run_functional_annotation(c("GOTERM_BP_ALL"), "~")
-  HIV_chart <- run_functional_annotation(
-    c("HIV_INTERACTION_CATEGORY", "HIV_INTERACTION", split_at = NULL)
-  )
-  KEGG_chart <- run_functional_annotation(c("KEGG_PATHWAY"), ":")
+  # Run GO analysis -----------------------------------------------------------
+    BP_chart <- FA_helper(c("GOTERM_BP_ALL"), "~")
+    HIV_chart <- FA_helper(
+      c("HIV_INTERACTION_CATEGORY", "HIV_INTERACTION", split_at = NULL)
+    )
+    KEGG_chart <- FA_helper(c("KEGG_PATHWAY"), ":")
 
-  detected_bp <- if (BP_chart == FALSE) FALSE else TRUE
-  detected_hiv <- if (HIV_chart == FALSE) FALSE else TRUE
-  detected_kegg <- if (KEGG_chart == FALSE) FALSE else TRUE
+  # Results -------------------------------------------------------------------
+    if(is.null(BP_chart) & is.null(HIV_chart) & is.null(KEGG_chart)) {
+      print("No significant biological process terms")
+    } else {
+      file_name <- stri_join(list_name, " GO Terms.xlsx")
+      wb <- createWorkbook(file_name)
 
-  if (save_file & (detected_bp | detected_hiv | detected_kegg)) {
-    file_name <- stri_join(list_name, " GO Terms.xlsx")
-    wb <- createWorkbook(file_name)
+      if (!is.null(BP_chart)) {
+        addWorksheet(wb, "Bio_Process")
+        writeData(wb, "Bio_Process", BP_chart)
+      } else print("No significant biological process terms")
 
-    if (detected_bp) {
-      addWorksheet(wb, "Bio_Process")
-      writeData(wb, "Bio_Process", BP_chart)
-    } else print("No significant biological process terms")
+      if (!is.null(HIV_chart)) {
+        addWorksheet(wb, "HIV_interaction")
+        writeData(wb, "HIV_interaction", HIV_chart)
+      } else print("No significant HIV interaction terms")
 
-    if (detected_hiv) {
-      addWorksheet(wb, "HIV_interaction")
-      writeData(wb, "HIV_interaction", HIV_chart)
-    } else print("No significant HIV interaction terms")
+      if (!is.null(KEGG_chart)) {
+        addWorksheet(wb, "KEGG_pathway")
+        writeData(wb, "KEGG_pathway", KEGG_chart)
+      } else print("No significant KEGG pathway terms")
 
+      saveWorkbook(wb, file_name, overwrite = TRUE)
+    }
 
-    if (detected_kegg) {
-      addWorksheet(wb, "KEGG_pathway")
-      writeData(wb, "KEGG_pathway", KEGG_chart)
-    } else print("No significant KEGG pathway terms")
-
-    saveWorkbook(wb, file_name, overwrite = TRUE)
-  } else print("No significant GO terms")
-
-  list(BP = BP_chart, HIV_interaction = HIV_chart, KEGG_pathway = KEGG_chart)
+    list(
+      Bio_processes = BP_chart,
+      HIV_interaction = HIV_chart,
+      KEGG_pathway = KEGG_chart
+    )
 }

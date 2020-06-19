@@ -42,7 +42,7 @@ run_edgeR <- function(gene_counts, ortho_list, show_plots) {
       p.adjust(lrtTreat$table$PValue, method = "fdr")
     )
     colnames(res) <- c("Gene_ID", "LFC", "padj")
-    res <- convert_IDs(res, ortho_list)
+    res <- filter_DEG_table(res, ortho_list)
 
   # Mean Difference Plots -----------------------------------------------------
     if (show_plots) limma::plotMD(lrtTreat, main = "Mean-Difference Plot")

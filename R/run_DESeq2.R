@@ -29,7 +29,7 @@ run_DESeq2 <- function(geneCounts, orthoList) {
 
     wald_res <- data.frame(rownames(wald), wald[, c(2, 6)])
     colnames(wald_res) <- c("Gene_ID", "LFC", "padj")
-    wald_res <- convert_IDs(wald_res, orthoList)
+    wald_res <- filter_DEG_table(wald_res, orthoList)
 
     print("DESeq2 Wald test DEG summary:", quote = FALSE)
     DESeq2::summary(wald, 0.05)
@@ -42,7 +42,7 @@ run_DESeq2 <- function(geneCounts, orthoList) {
 
     shrink_res <- data.frame(rownames(shrink), shrink[, c(2, 4)])
     colnames(shrink_res) <- c("Gene_ID", "LFC", "padj")
-    shrink_res <- convert_IDs(shrink_res, orthoList)
+    shrink_res <- filter_DEG_table(shrink_res, orthoList)
 
     print("DESeq2 Wald test with LFC shrinkage DEG summary:", quote = FALSE)
     DESeq2::summary(shrink, 0.05)
