@@ -78,11 +78,7 @@ run_edgeR <- function(gene_counts,
     colnames(summary_all) <- c("LRT", "LRT + TREAT")
 
   # Return a list object with all of the data ---------------------------------
-    filt <- function(x) subset(x, abs(x$LFC) >= 1 & x$padj <= 0.05)
-
     list(
-      summary = summary_all,
-      LRT = lrtRes, LRT_FDRfiltered = filt(lrtRes),
-      LRT_TREAT = lrtTreatRes, LRT_TREAT_FDRfiltered = filt(lrtTreatRes)
+      summary = summary_all, LRT = lrtRes, LRT_TREAT = lrtTreatRes
     )
 }

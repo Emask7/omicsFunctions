@@ -28,7 +28,7 @@ run_DESeq2 <- function(geneCounts, orthoList) {
   # Wald test -----------------------------------------------------------------
     waldDDS <- DESeq(dds, quiet = TRUE)
     waldRes <- results(waldDDS, lfcThreshold = 1)
-    waldSummary <- summary(waldRes, alpha = 0.05)
+    waldSummary <- DESeq2::summary(waldRes, alpha = 0.05)
     waldRes <- data.frame(rownames(waldRes), waldRes[, c(2, 6)])
     colnames(waldRes) <- c("Gene_ID", "LFC", "padj")
     waldRes <- convert_IDs(waldRes, orthoList)
@@ -37,19 +37,15 @@ run_DESeq2 <- function(geneCounts, orthoList) {
     shrinkRes <- lfcShrink(
       waldDDS, type = "apeglm", lfcThreshold = 1, coef = (4), quiet = TRUE
     )
-    shrinkSummary <- summary(shrinkRes, alpha = 0.05)
+    shrinkSummary <- DESeq2::summary(shrinkRes, alpha = 0.05)
     shrinkRes <- data.frame(rownames(shrinkRes), shrinkRes[, c(2, 4)])
     colnames(shrinkRes) <- c("Gene_ID", "LFC", "padj")
     shrinkRes <- convert_IDs(shrinkRes, orthoList)
 
 
   # Return a list object with all of the data ---------------------------------
-    filt <- function(x) subset(x, abs(x$LFC) >= 1 & x$padj <= 0.05)
-
     list(
-      Wald_summary = waldSummary, LFCshrinkage_summary = shrinkSummary,
-      Wald = waldRes, Wald_FDRfiltered = filt(waldRes),
-      LFCshrinkage = shrinkRes, LFCshrinkage_FDRfiltered = filt(shrinkRes)
+      Wald = waldRes, Wald_summary = waldSummary,
+      LFCshrinkage = shrinkRes, LFCshrinkage_summary = shrinkSummary
     )
-
 }
