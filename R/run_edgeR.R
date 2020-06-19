@@ -1,37 +1,43 @@
 #' @title edgeR wrapper
 #'
-#' @description
-#' @param geneCounts A data frame containing 6 columns of raw gene counts.
-#' @param orthoList A data frame containing two columns (Gene_ID and Human_Gene_ID)
-#' @param minCount numberic. The minimum number of reads required for at least some samples. By default, minCount is set to 5.
-#' @param normMethod The normalization method to be used for analysis. Options are "TMM", "TMMwsp", "RLE", "UQ", or "none". By default, this is set to "TMM".
-#' @param showPlots logical. If TRUE, plots are shown. If FALSE, plots are not shown. By default, this is set to FALSE.
+#' @description edgeR wrapper
+#' @param gene_counts A data frame containing 6 columns of raw gene counts.
+#' @param ortho_list A data frame containing two columns (Gene_ID and Human_Gene_ID)
+#' @param min_count numberic. The minimum number of reads required for at least some samples. By default, min_count is set to 5.
+#' @param norm_method The normalization method to be used for analysis. Options are "TMM", "TMMwsp", "RLE", "UQ", or "none". By default, this is set to "TMM".
+#' @param show_plots logical. If TRUE, plots are shown. If FALSE, plots are not shown. By default, this is set to FALSE.
+#' @import edgeR
 #' @export
 #' @examples
-#' runEdgeR()
+#' run_edgeR(gene_counts, ortho_list)
 
-runEdgeR <- function(geneCounts, orthoList, minCount = 5, normMethod = "TMM", showPlots = FALSE) {
+run_edgeR <- function(gene_counts,
+                     ortho_list,
+                     min_count = 5,
+                     norm_method = "TMM",
+                     show_plots) {
+
   # Specify experimental design factors ---------------------------------------
     animal <- factor(c(rep(c("15979", "30760", "31151"), 2)))
     timepoint <- factor(c(rep("T-7", 3), rep("T15", 3)))
-    design <- model.matrix(~animal+timepoint)
+    design <- model.matrix(~ animal + timepoint)
 
   # Make a DGEList object from the raw count data and filter for low reads ----
-    dgeList <- DGEList(counts = geneCounts, group = timepoint)
-    keep <- filterByExpr(dgeList, min.count = minCount)
+    dgeList <- DGEList(counts = gene_counts, group = timepoint)
+    keep <- filterByExpr(dgeList, min.count = min_count)
     dgeList <- dgeList[keep, , keep.lib.sizes = FALSE]
 
   # Calculate normalization factors -------------------------------------------
-    dgeList <- calcNormFactors(dgeList, method = normMethod)
+    dgeList <- calcNormFactors(dgeList, method = norm_method)
 
   # Data exploration: multidimensional scaling plot ---------------------------
-    if(showPlots) plotMDS(dgeList, main = "MDS Plot")
+    if (show_plots) limma::plotMDS(dgeList, main = "MDS Plot")
 
   # Estimate dispersion -------------------------------------------------------
     dgeList <- estimateDisp(dgeList, design, robust = TRUE)
 
   # Data exploration: biological coefficient of variation plot ----------------
-    if(showPlots) plotBCV(dgeList, main = "BCV Plot")
+    if (show_plots) plotBCV(dgeList, main = "BCV Plot")
 
   # DE testing: GLM approach --------------------------------------------------
     fit <- glmFit(dgeList, design)
@@ -41,8 +47,10 @@ runEdgeR <- function(geneCounts, orthoList, minCount = 5, normMethod = "TMM", sh
       p.adjust(lrt$table$PValue, method = "fdr")
     )
     colnames(lrtRes) <- c("Gene_ID", "LFC", "padj")
-    lrtRes <- convertIDs(lrtRes, orthoList)
-    lrtSummary <- summary(decideTests(lrt, adjust.method = "fdr", lfc = 1))
+    lrtRes <- convert_IDs(lrtRes, ortho_list)
+    lrtSummary <- summary(
+      limma::decideTests(lrt, adjust.method = "fdr", lfc = 1)
+    )
 
   # DE above a FC threshold: GLM approach -------------------------------------
     lrtTreat <- glmTreat(fit, lfc = 1, null = "interval")
@@ -51,15 +59,15 @@ runEdgeR <- function(geneCounts, orthoList, minCount = 5, normMethod = "TMM", sh
       p.adjust(lrtTreat$table$PValue, method = "fdr")
     )
     colnames(lrtTreatRes) <- c("Gene_ID", "LFC", "padj")
-    lrtTreatRes <- convertIDs(lrtTreatRes, orthoList)
+    lrtTreatRes <- convert_IDs(lrtTreatRes, ortho_list)
     lrtTreatSummary <- summary(
-      decideTests(lrtTreat, adjust.method = "fdr", lfc = 1)
+      limma::decideTests(lrtTreat, adjust.method = "fdr", lfc = 1)
     )
 
   # Mean Difference Plots -----------------------------------------------------
-    if(showPlots) {
-      plotMD(lrt, main = "Mean-Difference Plot - LRT")
-      plotMD(lrtTreat, main = "Mean-Difference Plot - LRT with TREAT")
+    if (show_plots) {
+      limma::plotMD(lrt, main = "Mean-Difference Plot - LRT")
+      limma::plotMD(lrtTreat, main = "Mean-Difference Plot - LRT with TREAT")
     }
 
   # Combine all summaries -----------------------------------------------------

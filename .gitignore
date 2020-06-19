@@ -40,3 +40,8 @@ vignettes/*.pdf
 
 # pkgdown site
 docs/
+packrat/lib*/
+
+# Excel files
+*.xlsx
+
