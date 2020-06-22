@@ -45,3 +45,6 @@ packrat/lib*/
 # Excel files
 *.xlsx
 
+# Prism files
+*.pzfx
+

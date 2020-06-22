@@ -39,45 +39,25 @@ head(humanHomologs)
 
 
 CD4T <- list(
-  human = list(
-    edgeR = run_edgeR(humanCounts[, 1:6], humanHomologs, show_plots = FALSE),
-    DESeq2 = run_DESeq2(humanCounts[, 1:6], humanHomologs)
-  ),
-  baboon = list(
-    edgeR = run_edgeR(baboonCounts[, 1:6], humanHomologs, show_plots = FALSE),
-    DESeq2 = run_DESeq2(baboonCounts[, 1:6], humanHomologs)
-  )
+  human = run_DESeq2(humanCounts[, 1:6], humanHomologs),
+  baboon = run_DESeq2(baboonCounts[, 1:6], humanHomologs)
 )
 
 CD8T <- list(
-  human = list(
-    edgeR = run_edgeR(humanCounts[, 7:12], humanHomologs, show_plots = FALSE),
-    DESeq2 = run_DESeq2(humanCounts[, 7:12], humanHomologs)
-  ),
-  baboon = list(
-    edgeR = run_edgeR(baboonCounts[, 7:12], humanHomologs, show_plots = FALSE),
-    DESeq2 = run_DESeq2(baboonCounts[, 7:12], humanHomologs)
-  )
+  human = run_DESeq2(humanCounts[, 7:12], humanHomologs),
+  baboon = run_DESeq2(baboonCounts[, 7:12], humanHomologs)
 )
 
 NK <- list(
-  human = list(
-    edgeR = run_edgeR(humanCounts[, 13:18], humanHomologs, show_plots = FALSE),
-    DESeq2 = run_DESeq2(humanCounts[, 13:18], humanHomologs)
-  ),
-  baboon = list(
-    edgeR = run_edgeR(baboonCounts[, 13:18], humanHomologs, show_plots = FALSE),
-    DESeq2 = run_DESeq2(baboonCounts[, 13:18], humanHomologs)
-  )
+  human = run_DESeq2(humanCounts[, 13:18], humanHomologs),
+  baboon = run_DESeq2(baboonCounts[, 13:18], humanHomologs)
 )
 
-nrow(NK$human$edgeR$results)
-nrow(NK$human$DESeq2$Wald)
-nrow(NK$human$DESeq2$LFCshrinkage)
+nrow(NK$human$Wald)
+nrow(NK$human$LFCshrinkage)
 
-nrow(NK$baboon$edgeR$results)
-nrow(NK$baboon$DESeq2$Wald)
-nrow(NK$baboon$DESeq2$LFCshrinkage)
+nrow(NK$baboon$Wald)
+nrow(NK$baboon$LFCshrinkage)
 
 
 
@@ -86,45 +66,95 @@ david <- DAVIDWebService(
   url = "https://david.ncifcrf.gov/webservice/services/DAVIDWebService.DAVIDWebServiceHttpSoap12Endpoint/"
 )
 
-is.connected(david)
+# is.connected(david)
 show(david)
 
 GO_results <- list(
   CD4T_human = list(
-    edgeR = run_DAVID(david, CD4T$human$edgeR$results, "CD4T_human_edgeR"),
-    DESeq2_Wald = run_DAVID(david, CD4T$human$DESeq2$Wald, "CD4T_human_DESeq2_Wald"),
-    DESeq2_LFCshrink = run_DAVID(david, CD4T$human$DESeq2$LFCshrinkage, "CD4T_human_DESeq2_LFCshrink")
+    Wald = run_DAVID(david, CD4T$human$Wald, "CD4T_human_Wald"),
+    LFCshrink = run_DAVID(david, CD4T$human$LFCshrinkage, "CD4T_human_LFCshrink")
   ),
   CD4T_baboon = list(
-    edgeR = run_DAVID(david, CD4T$baboon$edgeR$results, "CD4T_baboon_edgeR"),
-    DESeq2_Wald = run_DAVID(david, CD4T$baboon$DESeq2$Wald, "CD4T_baboon_DESeq2_Wald"),
-    DESeq2_LFCshrink = run_DAVID(david, CD4T$baboon$DESeq2$LFCshrinkage, "CD4T_baboon_DESeq2_LFCshrink")
+    Wald = run_DAVID(david, CD4T$baboon$Wald, "CD4T_baboon_Wald"),
+    LFCshrink = run_DAVID(david, CD4T$baboon$LFCshrinkage, "CD4T_baboon_LFCshrink")
   ),
   CD8T_human = list(
-    edgeR = run_DAVID(david, CD8T$human$edgeR$results, "CD8T_human_edgeR"),
-    DESeq2_Wald = run_DAVID(david, CD8T$human$DESeq2$Wald, "CD8T_human_DESeq2_Wald"),
-    DESeq2_LFCshrink = run_DAVID(david, CD8T$human$DESeq2$LFCshrinkage, "CD8T_human_DESeq2_LFCshrink")
+    Wald = run_DAVID(david, CD8T$human$Wald, "CD8T_human_Wald"),
+    LFCshrink = run_DAVID(david, CD8T$human$LFCshrinkage, "CD8T_human_LFCshrink")
   ),
   CD8T_baboon = list(
-    edgeR = run_DAVID(david, CD8T$baboon$edgeR$results, "CD8T_baboon_edgeR"),
-    DESeq2_Wald = run_DAVID(david, CD8T$baboon$DESeq2$Wald, "CD8T_baboon_DESeq2_Wald"),
-    DESeq2_LFCshrink = run_DAVID(david, CD8T$baboon$DESeq2$LFCshrinkage, "CD8T_baboon_DESeq2_LFCshrink")
+    Wald = run_DAVID(david, CD8T$baboon$Wald, "CD8T_baboon_Wald"),
+    LFCshrink = run_DAVID(david, CD8T$baboon$LFCshrinkage, "CD8T_baboon_LFCshrink")
   ),
   NK_human = list(
-    edgeR = run_DAVID(david, NK$human$edgeR$results, "NK_human_edgeR"),
-    DESeq2_Wald = run_DAVID(david, NK$human$DESeq2$Wald, "NK_human_DESeq2_Wald"),
-    DESeq2_LFCshrink = run_DAVID(david, NK$human$DESeq2$LFCshrinkage, "NK_human_DESeq2_LFCshrink")
+    Wald = run_DAVID(david, NK$human$Wald, "NK_human_Wald"),
+    LFCshrink = run_DAVID(david, NK$human$LFCshrinkage, "NK_human_LFCshrink")
   ),
   NK_baboon = list(
-    # edgeR = run_DAVID(david, NK$baboon$edgeR$results, "NK_baboon_edgeR"),
-    # DESeq2_Wald = run_DAVID(david, NK$baboon$DESeq2$Wald, "NK_baboon_DESeq2_Wald"),
-    DESeq2_LFCshrink = run_DAVID(david, NK$baboon$DESeq2$LFCshrinkage, "NK_baboon_DESeq2_LFCshrink")
+    Wald = run_DAVID(david, NK$baboon$Wald, "NK_baboon_Wald"),
+    LFCshrink = run_DAVID(david, NK$baboon$LFCshrinkage, "NK_baboon_LFCshrink")
   )
 )
 
+nrow(GO_results$CD4T_human$Wald)
+nrow(GO_results$CD4T_human$LFCshrink)
+
+nrow(GO_results$CD4T_baboon$Wald)
+nrow(GO_results$CD4T_baboon$LFCshrink)
+
+nrow(GO_results$CD8T_human$Wald)
+nrow(GO_results$CD8T_human$LFCshrink)
+
+nrow(GO_results$CD8T_baboon$Wald)
+nrow(GO_results$CD8T_baboon$LFCshrink)
+
+nrow(GO_results$NK_human$Wald)
+nrow(GO_results$NK_human$LFCshrink)
+
+nrow(GO_results$NK_baboon$Wald)
+nrow(GO_results$NK_baboon$LFCshrink)
 
 
 
 
 
 
+CD4T_temp <- GO_results$CD4T_human$LFCshrink[, c(3, 9)]
+colnames(CD4T_temp) <- c("Term", "Zscore_CD4T")
+
+CD8T_temp <- GO_results$CD8T_baboon$LFCshrink[, c(3, 9)]
+colnames(CD8T_temp) <- c("Term", "Zscore_CD8T")
+
+NK_temp <- GO_results$NK_baboon$LFCshrink[, c(3, 9)]
+colnames(NK_temp) <- c("Term", "Zscore_NK")
+
+LFCshrink_BP <- dplyr::full_join(CD4T_temp, CD8T_temp, by = "Term")
+LFCshrink_BP <- dplyr::full_join(LFCshrink_BP, NK_temp, by = "Term")
+
+for (x in 1:nrow(LFCshrink_BP)) {
+  if (grepl("negative regulation of", LFCshrink_BP[x, 1])) {
+    new_name <- limma::strsplit2(LFCshrink_BP[x, 1], " of ")[2]
+    new_name <- stringi::stri_join(new_name, ", negative regulation of")
+    LFCshrink_BP[x, 1] <- new_name
+  } else if (grepl("positive regulation of", LFCshrink_BP[x, 1])) {
+    new_name <- limma::strsplit2(LFCshrink_BP[x, 1], " of ")[2]
+    new_name <- stringi::stri_join(new_name, ", positive regulation of")
+    LFCshrink_BP[x, 1] <- new_name
+  } else if (grepl("regulation of", LFCshrink_BP[x, 1])) {
+    new_name <- limma::strsplit2(LFCshrink_BP[x, 1], " of ")[2]
+    new_name <- stringi::stri_join(new_name, ", regulation of")
+    LFCshrink_BP[x, 1] <- new_name
+  }
+}
+
+
+rownames(LFCshrink_BP) <- LFCshrink_BP[, 1]
+LFCshrink_BP <- LFCshrink_BP[, 2:4]
+head.DataTable(LFCshrink_BP, 10)
+
+wb <- openxlsx::createWorkbook("LFCshrink Biological Processes GO.xlsx")
+
+openxlsx::addWorksheet(wb, "sheet1")
+openxlsx::writeData(wb, "sheet1", LFCshrink_BP, rowNames = TRUE)
+
+openxlsx::saveWorkbook(wb, "LFCshrink Biological Processes GO.xlsx", overwrite = TRUE)

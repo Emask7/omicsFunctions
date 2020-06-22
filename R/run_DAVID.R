@@ -13,66 +13,24 @@
 #' @import RDAVIDWebService
 #' @import openxlsx
 #' @import AnnotationDbi
+#' @import GOplot
 #' @export
 #' @examples
 #' run_DAVID(davidWS, list_name)
 
 run_DAVID <- function(davidWS, DE_data, list_name, save_file = TRUE) {
-  FA_helper <- function(annotation_cat, split_at) {
-    setAnnotationCategories(davidWS, annotation_cat)
-    FA_chart <- getFunctionalAnnotationChart(davidWS)
-    FA_sub <- subset(
-      FA_chart, FA_chart$FDR <= 0.05 & FA_chart$Fold.Enrichment >= 2
-    )
-
-    if (nrow(FA_sub) < 1) return(NULL)
-
-    gene_list <- data.frame(FA_sub$Genes)
-    for (r in 1:nrow(gene_list)) {
-      gene_names <- limma::strsplit2(gene_list[r, 1], ", ")[1, ]
-      gene_names <- list(
-        mapIds(
-          org.Hs.eg.db, gene_names, keytype = "ENSEMBL", column = "SYMBOL"
-        )
-      )
-      gene_names <- stri_join_list(gene_names, sep = ", ")
-      gene_list[r, 1] <- gene_names
-    }
-
-    if (is.null(split_at)) {
-      res <- data.frame(
-        FA_sub$Category, FA_sub$Term, FA_sub$Count, FA_sub$X.,
-        FA_sub$Genes, FA_sub$Fold.Enrichment, FA_sub$FDR
-      )
-      colnames(res) <- c(
-        "Category", "Term", "Count", "Percent_of_input_list",
-        "Genes", "Fold.Enrichment", "FDR"
-      )
-    } else {
-      split_IDs <- limma::strsplit2(FA_sub$Term, split_at)
-      res <- data.frame(
-        FA_sub$Category, split_IDs, FA_sub$Count, FA_sub$X.,
-        gene_list, FA_sub$Fold.Enrichment, FA_sub$FDR
-      )
-      colnames(res) <- c(
-        "Category", "ID", "Term", "Count", "Percent_of_input_list",
-        "Genes", "Fold.Enrichment", "FDR"
-      )
-    }
-
-    res
-  }
-
   # Make sure input is valid --------------------------------------------------
-    cNames <- colnames(DE_data)
     if (nrow(DE_data) < 1) {
       print("Error: input has 0 rows", quote = FALSE)
       return(NULL)
     }
+
+    cNames <- colnames(DE_data)
     if (cNames[1] != "Gene_ID" | cNames[2] != "LFC" | cNames[3] != "padj") {
       print("Error: input must have 3 columns (Gene_ID, LFC, and padj)")
       return(NULL)
     }
+
     if (!is.connected(david)) {
       print("Error: not connected to RDAVIDWebService", quote = FALSE)
       return(NULL)
@@ -98,47 +56,63 @@ run_DAVID <- function(davidWS, DE_data, list_name, save_file = TRUE) {
         davidWS, ensemblIDs, idType = "ENSEMBL_GENE_ID",
         listName = list_name, listType = "Gene"
       )
+
+      gene_lists <- getGeneListNames(davidWS)
     } else setCurrentGeneListPosition(davidWS, list_position)
 
-    gene_lists <- getGeneListNames(davidWS)
     print("Running GO analysis on gene list:")
     print(gene_lists[getCurrentGeneListPosition(davidWS)])
 
   # Run GO analysis -----------------------------------------------------------
-    BP_chart <- FA_helper(c("GOTERM_BP_ALL"), "~")
-    HIV_chart <- FA_helper(
-      c("HIV_INTERACTION_CATEGORY", "HIV_INTERACTION", split_at = NULL)
-    )
-    KEGG_chart <- FA_helper(c("KEGG_PATHWAY"), ":")
+    setAnnotationCategories(davidWS, c("GOTERM_BP_ALL"))
+    FA_chart <- getFunctionalAnnotationChart(davidWS)
+    FA_sub <- subset(FA_chart, FA_chart$FDR <= 0.05)
 
-  # Results -------------------------------------------------------------------
-    if(is.null(BP_chart) & is.null(HIV_chart) & is.null(KEGG_chart)) {
-      print("No significant biological process terms")
+    if (nrow(FA_sub) < 1) {
+      print("No significant GO terms")
+      data.frame()
     } else {
+      gene_list <- data.frame(FA_sub$Genes)
+      for (r in 1:nrow(gene_list)) {
+        gene_names <- limma::strsplit2(gene_list[r, 1], ", ")[1, ]
+        gene_names <- list(
+          mapIds(
+            org.Hs.eg.db, gene_names, keytype = "ENSEMBL", column = "SYMBOL"
+          )
+        )
+        gene_names <- stri_join_list(gene_names, sep = ", ")
+        gene_list[r, 1] <- gene_names
+      }
+
+      split_IDs <- limma::strsplit2(FA_sub$Term, "~")
+      FA_sub <- data.frame(
+        FA_sub$Category, split_IDs, FA_sub$Count, FA_sub$X.,
+        gene_list, FA_sub$Fold.Enrichment, FA_sub$FDR
+      )
+      colnames(FA_sub) <- c(
+        "Category", "ID", "Term", "Count", "Percent_of_input_list",
+        "Genes", "Fold.Enrichment", "FDR"
+      )
+
+      terms_data <- data.frame(FA_sub[, c(1:3, 8, 6)])
+      colnames(terms_data) <- c("category", "ID", "term", "adj_pval", "genes")
+
+      genes_data <- data.frame(DE_data$Gene_ID, DE_data$LFC)
+      colnames(genes_data) <- c("ID", "logFC")
+
+      cd <- GOplot::circle_dat(terms_data, genes_data)
+
+      zScores <- cd[, c(2, 8)]
+      zScores <- zScores[!duplicated(zScores), ]
+      zScores <- dplyr::left_join(FA_sub, zScores, by = "ID")
+      zScores <- subset(zScores, abs(zScores$zscore) >= 2)
+
       file_name <- stri_join(list_name, " GO Terms.xlsx")
       wb <- createWorkbook(file_name)
-
-      if (!is.null(BP_chart)) {
-        addWorksheet(wb, "Bio_Process")
-        writeData(wb, "Bio_Process", BP_chart)
-      } else print("No significant biological process terms")
-
-      if (!is.null(HIV_chart)) {
-        addWorksheet(wb, "HIV_interaction")
-        writeData(wb, "HIV_interaction", HIV_chart)
-      } else print("No significant HIV interaction terms")
-
-      if (!is.null(KEGG_chart)) {
-        addWorksheet(wb, "KEGG_pathway")
-        writeData(wb, "KEGG_pathway", KEGG_chart)
-      } else print("No significant KEGG pathway terms")
-
+      addWorksheet(wb, "Bio_Process")
+      writeData(wb, "Bio_Process", zScores)
       saveWorkbook(wb, file_name, overwrite = TRUE)
-    }
 
-    list(
-      Bio_processes = BP_chart,
-      HIV_interaction = HIV_chart,
-      KEGG_pathway = KEGG_chart
-    )
+      zScores
+    }
 }

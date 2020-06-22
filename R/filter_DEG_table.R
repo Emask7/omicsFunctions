@@ -14,7 +14,7 @@ filter_DEG_table <- function(data_table, human_IDs) {
 
   if (nrow(filtered) < 1) {
     print("No significant DEGs", quote = FALSE)
-    return(NULL)
+    return(data.frame())
   }
   else {
     filtered <- dplyr::left_join(filtered, human_IDs, by = "Gene_ID")
