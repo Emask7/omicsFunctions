@@ -9,7 +9,8 @@
 
 filter_DEG_table <- function(data_table, human_IDs) {
   filtered <- base::subset(
-    data_table, data_table$padj <= 0.05 & abs(data_table$LFC) >= 1
+    data_table,
+    data_table$padj <= 0.05 & abs(data_table$LFC) >= 1
   )
 
   if (nrow(filtered) < 1) {
@@ -23,7 +24,8 @@ filter_DEG_table <- function(data_table, human_IDs) {
         filtered[n, 1] <- filtered[n, 4]
       }
     }
-    return(subset(filtered, !grepl("ENSPANG", filtered$Gene_ID))[, 1:3])
+    # return(subset(filtered, !grepl("ENSPANG", filtered$Gene_ID))[, 1:3])
+    return(filtered[, 1:3])
   }
 }
 

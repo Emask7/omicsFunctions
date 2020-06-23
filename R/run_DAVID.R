@@ -20,6 +20,8 @@
 
 run_DAVID <- function(davidWS, DE_data, list_name, save_file = TRUE) {
   # Make sure input is valid --------------------------------------------------
+    # DE_data <- subset.data.frame(DE_data, !grepl("ENSPANG", DE_data$Gene_ID))
+
     if (nrow(DE_data) < 1) {
       print("Error: input has 0 rows", quote = FALSE)
       return(NULL)
@@ -113,6 +115,6 @@ run_DAVID <- function(davidWS, DE_data, list_name, save_file = TRUE) {
       writeData(wb, "Bio_Process", zScores)
       saveWorkbook(wb, file_name, overwrite = TRUE)
 
-      zScores
+      list(GOplot_results = cd, z_scores = zScores)
     }
 }

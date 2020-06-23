@@ -37,19 +37,12 @@ run_edgeR <- function(gene_counts, ortho_list, show_plots) {
     fit <- glmFit(dgeList, design)
     lrtTreat <- glmTreat(fit, lfc = 1, null = "interval")
 
+    if (show_plots) limma::plotMD(lrtTreat, main = "Mean-Difference Plot")
+
     res <- data.frame(
       rownames(lrtTreat$table), lrtTreat$table$logFC,
       p.adjust(lrtTreat$table$PValue, method = "fdr")
     )
     colnames(res) <- c("Gene_ID", "LFC", "padj")
-    res <- filter_DEG_table(res, ortho_list)
-
-  # Mean Difference Plots -----------------------------------------------------
-    if (show_plots) limma::plotMD(lrtTreat, main = "Mean-Difference Plot")
-
-  # Return a list object with all of the data ---------------------------------
-    DE_summary <- base::summary(
-      limma::decideTests(lrtTreat, adjust.method = "fdr", p.value = 0.05)
-    )
-    list(results = res, summary = DE_summary)
+    filter_DEG_table(res, ortho_list)
 }
