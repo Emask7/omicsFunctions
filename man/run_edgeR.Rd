@@ -4,14 +4,14 @@
 \alias{run_edgeR}
 \title{edgeR wrapper}
 \usage{
-run_edgeR(gene_counts, ortho_list, show_plots)
+run_edgeR(gene_counts, ortho_list, LFC_filter)
 }
 \arguments{
 \item{gene_counts}{A data frame containing 6 columns of raw gene counts.}
 
 \item{ortho_list}{A data frame containing two columns (Gene_ID and Human_Gene_ID)}
 
-\item{show_plots}{logical. If TRUE, plots are shown. If FALSE, plots are not shown.}
+\item{LFC_filter}{logical. If TRUE, DEG lists are filtered by LFC values in addition to FDR values}
 }
 \description{
 edgeR wrapper

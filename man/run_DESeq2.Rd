@@ -4,12 +4,14 @@
 \alias{run_DESeq2}
 \title{DESeq2 wrapper}
 \usage{
-run_DESeq2(geneCounts, orthoList)
+run_DESeq2(geneCounts, orthoList, LFC_filter)
 }
 \arguments{
 \item{geneCounts}{A data frame containing 6 columns of raw gene counts.}
 
 \item{orthoList}{A data frame containing two columns (Gene_ID and Human_Gene_ID)}
+
+\item{LFC_filter}{logical. If TRUE, DEG lists are filtered by LFC values in addition to FDR values}
 }
 \description{
 DESeq2 wrapper

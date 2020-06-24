@@ -39,22 +39,22 @@ library(RDAVIDWebService)
 
 # Differential expression analyses --------------------------------------------
   CD4T <- list(
-    human_DESeq2 = run_DESeq2(humanCounts[, 1:6], humanHomologs),
-    human_edgeR = run_edgeR(humanCounts[, 1:6], humanHomologs, FALSE),
-    baboon_DESeq2 = run_DESeq2(baboonCounts[, 1:6], humanHomologs),
-    baboon_edgeR = run_edgeR(baboonCounts[, 1:6], humanHomologs, FALSE)
+    human_DESeq2 = run_DESeq2(humanCounts[, 1:6], humanHomologs, TRUE),
+    human_edgeR = run_edgeR(humanCounts[, 1:6], humanHomologs, TRUE),
+    baboon_DESeq2 = run_DESeq2(baboonCounts[, 1:6], humanHomologs, TRUE),
+    baboon_edgeR = run_edgeR(baboonCounts[, 1:6], humanHomologs, TRUE)
   )
   CD8T <- list(
-    human_DESeq2 = run_DESeq2(humanCounts[, 7:12], humanHomologs),
-    human_edgeR = run_edgeR(humanCounts[, 7:12], humanHomologs, FALSE),
-    baboon_DESeq2 = run_DESeq2(baboonCounts[, 7:12], humanHomologs),
-    baboon_edgeR = run_edgeR(baboonCounts[, 7:12], humanHomologs, FALSE)
+    human_DESeq2 = run_DESeq2(humanCounts[, 7:12], humanHomologs, TRUE),
+    human_edgeR = run_edgeR(humanCounts[, 7:12], humanHomologs, TRUE),
+    baboon_DESeq2 = run_DESeq2(baboonCounts[, 7:12], humanHomologs, TRUE),
+    baboon_edgeR = run_edgeR(baboonCounts[, 7:12], humanHomologs, TRUE)
   )
   NK <- list(
-    human_DESeq2 = run_DESeq2(humanCounts[, 13:18], humanHomologs),
-    human_edgeR = run_edgeR(humanCounts[, 13:18], humanHomologs, FALSE),
-    baboon_DESeq2 = run_DESeq2(baboonCounts[, 13:18], humanHomologs),
-    baboon_edgeR = run_edgeR(baboonCounts[, 13:18], humanHomologs, FALSE)
+    human_DESeq2 = run_DESeq2(humanCounts[, 13:18], humanHomologs, TRUE),
+    human_edgeR = run_edgeR(humanCounts[, 13:18], humanHomologs, TRUE),
+    baboon_DESeq2 = run_DESeq2(baboonCounts[, 13:18], humanHomologs, TRUE),
+    baboon_edgeR = run_edgeR(baboonCounts[, 13:18], humanHomologs, TRUE)
   )
 
   write_DEGs_to_Excel(

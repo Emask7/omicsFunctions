@@ -4,16 +4,18 @@
 \alias{filter_DEG_table}
 \title{Filter differential expression data}
 \usage{
-filter_DEG_table(data_table, human_IDs)
+filter_DEG_table(data_table, human_IDs, LFC_filter)
 }
 \arguments{
 \item{data_table}{data.fame of DEGs}
 
 \item{human_IDs}{data.frame with human gene names}
+
+\item{LFC_filter}{logical. If TRUE, DEG lists are filtered by LFC values in addition to FDR values}
 }
 \description{
 Filters differential expression data to remove all genes with an FDR value of > 0.05, log-fold-change values between -1 and 1, and/or genes with only ENSPANG IDs
 }
 \examples{
-filter_DEG_table(data_table, human_IDs)
+filter_DEG_table(data_table, human_IDs, LFC_filter)
 }

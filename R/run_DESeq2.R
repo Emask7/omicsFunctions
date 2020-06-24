@@ -3,12 +3,13 @@
 #' @description DESeq2 wrapper
 #' @param geneCounts A data frame containing 6 columns of raw gene counts.
 #' @param orthoList A data frame containing two columns (Gene_ID and Human_Gene_ID)
+#' @param LFC_filter logical. If TRUE, DEG lists are filtered by LFC values in addition to FDR values
 #' @import DESeq2
 #' @export
 #' @examples
 #' run_DESeq2(geneCounts, orthoList)
 
-run_DESeq2 <- function(geneCounts, orthoList) {
+run_DESeq2 <- function(geneCounts, orthoList, LFC_filter) {
   # Specify experimental design factors ---------------------------------------
     animal <- factor(c(rep(c("15979", "30760", "31151"), 2)))
     timepoint <- factor(c(rep("T-7", 3), rep("T15", 3)))
@@ -29,7 +30,7 @@ run_DESeq2 <- function(geneCounts, orthoList) {
 
     wald_res <- data.frame(rownames(wald), wald[, c(2, 6)])
     colnames(wald_res) <- c("Gene_ID", "LFC", "padj")
-    wald_res <- filter_DEG_table(wald_res, orthoList)
+    wald_res <- filter_DEG_table(wald_res, orthoList, LFC_filter)
 
     print("DESeq2 Wald test DEG summary:", quote = FALSE)
     DESeq2::summary(wald, 0.05)
@@ -42,7 +43,7 @@ run_DESeq2 <- function(geneCounts, orthoList) {
 
     shrink_res <- data.frame(rownames(shrink), shrink[, c(2, 4)])
     colnames(shrink_res) <- c("Gene_ID", "LFC", "padj")
-    shrink_res <- filter_DEG_table(shrink_res, orthoList)
+    shrink_res <- filter_DEG_table(shrink_res, orthoList, LFC_filter)
 
     print("DESeq2 Wald test with LFC shrinkage DEG summary:", quote = FALSE)
     DESeq2::summary(shrink, 0.05)
