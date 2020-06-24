@@ -5,12 +5,12 @@ library(SIVomics)
 cytokine_production <- list(
   CD4T = get_term_DEGs(
     c("cytokine production"),
-    GO_LFCshrink_human$CD4T, CD4T$human_DESeq2$LFCshrinkage,
+    CD4T_GO, CD4T$human_DESeq2$LFCshrinkage,
     "Cytokine Production DEGs.xlsx", "CD4T", FALSE
   ),
   CD8T = get_term_DEGs(
     c("cytokine production"),
-    GO_LFCshrink_human$CD8T, CD8T$human_DESeq2$LFCshrinkage,
+    CD8T_GO, CD8T$human_DESeq2$LFCshrinkage,
     "Cytokine Production DEGs.xlsx", "CD8T", FALSE
   ),
   NK = get_term_DEGs(
@@ -23,12 +23,12 @@ cytokine_production <- list(
 regulation_of_cytokine_production <- list(
   CD4T = get_term_DEGs(
     c("regulation of cytokine production"),
-    GO_LFCshrink_human$CD4T, CD4T$human_DESeq2$LFCshrinkage,
+    CD4T_GO, CD4T$human_DESeq2$LFCshrinkage,
     "Regulation of Cytokine Production DEGs.xlsx", "CD4T", FALSE
   ),
   CD8T = get_term_DEGs(
     c("regulation of cytokine production"),
-    GO_LFCshrink_human$CD8T, CD8T$human_DESeq2$LFCshrinkage,
+    CD8T_GO, CD8T$human_DESeq2$LFCshrinkage,
     "Regulation of Cytokine Production DEGs.xlsx", "CD8T", FALSE
   ),
   NK = get_term_DEGs(
@@ -39,13 +39,13 @@ regulation_of_cytokine_production <- list(
   positive = list(
     CD4T = get_term_DEGs(
       c("positive regulation of cytokine production"),
-      GO_LFCshrink_human$CD4T, CD4T$human_DESeq2$LFCshrinkage,
+      CD4T_GO, CD4T$human_DESeq2$LFCshrinkage,
       "Regulation of Cytokine Production DEGs.xlsx",
       "CD4T - positive reg.", FALSE
     ),
     CD8T = get_term_DEGs(
       c("positive regulation of cytokine production"),
-      GO_LFCshrink_human$CD8T, CD8T$human_DESeq2$LFCshrinkage,
+      CD8T_GO, CD8T$human_DESeq2$LFCshrinkage,
       "Regulation of Cytokine Production DEGs.xlsx",
       "CD8T - positive reg.", FALSE
     ),
@@ -59,13 +59,13 @@ regulation_of_cytokine_production <- list(
   negative = list(
     CD4T = get_term_DEGs(
       c("negative regulation of cytokine production"),
-      GO_LFCshrink_human$CD4T, CD4T$human_DESeq2$LFCshrinkage,
+      CD4T_GO, CD4T$human_DESeq2$LFCshrinkage,
       "Regulation of Cytokine Production DEGs.xlsx",
       "CD4T - negative reg.", FALSE
     ),
     CD8T = get_term_DEGs(
       c("negative regulation of cytokine production"),
-      GO_LFCshrink_human$CD8T, CD8T$human_DESeq2$LFCshrinkage,
+      CD8T_GO, CD8T$human_DESeq2$LFCshrinkage,
       "Regulation of Cytokine Production DEGs.xlsx",
       "CD8T - negative reg.", FALSE
     ),
@@ -185,13 +185,3 @@ regulation_of_cytokine_production <- list(
 # writeData(wb, "Immune Response", immune_system)
 #
 # saveWorkbook(wb, "GO Term DEG Lists.xlsx", overwrite = TRUE)
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#

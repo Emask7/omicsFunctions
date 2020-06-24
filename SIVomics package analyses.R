@@ -166,16 +166,25 @@ library(RDAVIDWebService)
   is.connected(david)
   show(david)
 
+
   GO_LFCshrink_human <- list(
     CD4T = run_DAVID(david, CD4T$human_DESeq2$LFCshrinkage, "CD4T_human_LFCshrink"),
     CD8T = run_DAVID(david, CD8T$human_DESeq2$LFCshrinkage, "CD8T_human_LFCshrink"),
     NK = run_DAVID(david, NK$human_DESeq2$LFCshrinkage, "NK_human_LFCshrink")
   )
 
+  CD4T_GO <- run_DAVID(david, CD4T$human_DESeq2$LFCshrinkage, "CD4T_human_LFCshrink")
+  CD8T_GO <- run_DAVID(david, CD8T$human_DESeq2$LFCshrinkage, "CD8T_human_LFCshrink")
+  NK_GO <- run_DAVID(david, NK$human_DESeq2$LFCshrinkage, "NK_human_LFCshrink")
 
+NK_GO_backup <- NK_GO
 
+  # Troubleshooting the "Read timed out" error --------------------------------
+    setTimeOut(david, 50000)
+    getTimeOut(david)
 
-
+    setHttpProtocolVersion(david, "HTTP/1.0")
+    getHttpProtocolVersion(david)
 
 
 
