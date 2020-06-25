@@ -44,5 +44,8 @@ run_edgeR <- function(gene_counts, ortho_list, LFC_filter) {
       p.adjust(lrtTreat$table$PValue, method = "fdr")
     )
     colnames(res) <- c("Gene_ID", "LFC", "padj")
-    filter_DEG_table(res, ortho_list, LFC_filter)
+    list(
+      DGE_list = dgeList,
+      res = filter_DEG_table(res, ortho_list, LFC_filter)
+    )
 }
