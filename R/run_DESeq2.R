@@ -1,53 +1,42 @@
 #' @title DESeq2 wrapper
 #'
 #' @description DESeq2 wrapper
-#' @param geneCounts A data frame containing 6 columns of raw gene counts.
-#' @param orthoList A data frame containing two columns (Gene_ID and Human_Gene_ID)
-#' @param LFC_filter logical. If TRUE, DEG lists are filtered by LFC values in addition to FDR values
-#' @import DESeq2
+#' @param geneCounts data.frame containing 6 columns of raw gene or transcript counts.
+#' @param sample_data data.frame containing experimental factrors, with the number of rows equal to the number of samples
+#' @param expt_design a formula indicating the factors of the experimental design
+#' @param coefficient a number indicating the coefficient to be tested
+#' @param count_type string. Either "gene" or "transcript"
 #' @export
 #' @examples
-#' run_DESeq2(geneCounts, orthoList)
+#' run_DESeq2(geneCounts, sample_data, expt_design, coefficient, count_type)
 
-run_DESeq2 <- function(geneCounts, orthoList, LFC_filter) {
-  # Specify experimental design factors ---------------------------------------
-    animal <- factor(c(rep(c("15979", "30760", "31151"), 2)))
-    timepoint <- factor(c(rep("T-7", 3), rep("T15", 3)))
-    sampleData <- data.frame(animal, timepoint)
-
+run_DESeq2 <- function(geneCounts, sample_data, expt_design, coefficient, count_type) {
   # Make a DESeqDataSet object ------------------------------------------------
     geneCounts <- as.matrix(geneCounts)
     geneCounts[, 1:6] <- as.integer(geneCounts)
 
-    dds <- DESeqDataSetFromMatrix(
-      countData = geneCounts, colData = sampleData,
-      design = ~ animal + timepoint
+    dds <- DESeq2::DESeqDataSetFromMatrix(
+      countData = geneCounts, colData = sample_data, design = expt_design
     )
-
-  # Wald test -----------------------------------------------------------------
-    waldDDS <- DESeq(dds, quiet = TRUE)
-    wald <- DESeq2::results(waldDDS, lfcThreshold = 1)
-
-    wald_res <- data.frame(rownames(wald), wald[, c(2, 6)])
-    colnames(wald_res) <- c("Gene_ID", "LFC", "padj")
-    wald_res <- filter_DEG_table(wald_res, orthoList, LFC_filter)
-
-    print("DESeq2 Wald test DEG summary:", quote = FALSE)
-    DESeq2::summary(wald, 0.05)
-    print(" ", quote = FALSE)
 
   # Wald test with LFC shrinkage ----------------------------------------------
-    shrink <- lfcShrink(
-      waldDDS, type = "apeglm", lfcThreshold = 1, coef = (4), quiet = TRUE
-    )
+    dds <- DESeq2::DESeq(dds, quiet = TRUE)
 
-    shrink_res <- data.frame(rownames(shrink), shrink[, c(2, 4)])
-    colnames(shrink_res) <- c("Gene_ID", "LFC", "padj")
-    shrink_res <- filter_DEG_table(shrink_res, orthoList, LFC_filter)
+    shrink <- DESeq2::lfcShrink(
+      dds, type = "apeglm", lfcThreshold = 1, coef = coefficient, quiet = TRUE
+    )
 
     print("DESeq2 Wald test with LFC shrinkage DEG summary:", quote = FALSE)
     DESeq2::summary(shrink, 0.05)
 
+    res <- data.frame(rownames(shrink), shrink[, c(2, 4)])
+    if (count_type == "gene") colnames(res) <- c("Gene_ID", "LFC", "padj")
+    else if (count_type == "transcript") {
+      colnames(res) <- c("Transcript_ID", "LFC", "padj")
+    } else print("Error: count_type must be either 'gene' or 'transcript'")
+
+    res_filt <- subset(res, res$padj <= 0.05 & abs(res$LFC) >= 1)
+
   # Return a list object with all of the data ---------------------------------
-    list(Wald = wald_res, LFCshrinkage = shrink_res)
+    list(DESeq_object = dds, results = res, filtered_results = res_filt)
 }

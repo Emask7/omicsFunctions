@@ -4,18 +4,22 @@
 \alias{run_DESeq2}
 \title{DESeq2 wrapper}
 \usage{
-run_DESeq2(geneCounts, orthoList, LFC_filter)
+run_DESeq2(geneCounts, sample_data, expt_design, coefficient, count_type)
 }
 \arguments{
-\item{geneCounts}{A data frame containing 6 columns of raw gene counts.}
+\item{geneCounts}{data.frame containing 6 columns of raw gene or transcript counts.}
 
-\item{orthoList}{A data frame containing two columns (Gene_ID and Human_Gene_ID)}
+\item{sample_data}{data.frame containing experimental factrors, with the number of rows equal to the number of samples}
 
-\item{LFC_filter}{logical. If TRUE, DEG lists are filtered by LFC values in addition to FDR values}
+\item{expt_design}{a formula indicating the factors of the experimental design}
+
+\item{coefficient}{a number indicating the coefficient to be tested}
+
+\item{count_type}{string. Either "gene" or "transcript"}
 }
 \description{
 DESeq2 wrapper
 }
 \examples{
-run_DESeq2(geneCounts, orthoList)
+run_DESeq2(geneCounts, sample_data, expt_design, coefficient, count_type)
 }

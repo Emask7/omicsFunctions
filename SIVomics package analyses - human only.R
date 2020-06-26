@@ -17,37 +17,37 @@ sample_list <- c(
   "NK_T15_15979", "NK_T15_30760", "NK_T15_31151"
 )
 
-geneCounts <- read.xlsx("copy - Partek_LG_RNA_Seq_20190304_raw_human_gene_counts.xlsx")
-rownames(geneCounts) <- make.names(geneCounts[, 5], unique = TRUE)
-geneCounts <- geneCounts[, 7:24]
-colnames(geneCounts) <- c(sample_list)
-head(geneCounts)
+gCounts <- read.xlsx("copy - Partek_LG_RNA_Seq_20190304_raw_human_gene_counts.xlsx")
+rownames(gCounts) <- make.names(gCounts[, 5], unique = TRUE)
+gCounts <- gCounts[, 7:24]
+colnames(gCounts) <- c(sample_list)
+head(gCounts)
 
-transcriptCounts <- read.xlsx("copy - Partek_LG_RNA_Seq_20190304_raw_human_transcript_counts.xlsx")
-rownames(transcriptCounts) <- make.names(transcriptCounts[, 5], unique = TRUE)
-transcriptCounts <- transcriptCounts[, c(6, 9, 16, 20:37)]
-colnames(transcriptCounts) <- c("Gene_ID", "Ensembl_Gene_ID", "Ensembl_Transcript_ID", sample_list)
-head(transcriptCounts)
-
-
-colnames(transcriptCounts)
+tCounts <- read.xlsx("copy - Partek_LG_RNA_Seq_20190304_raw_human_transcript_counts.xlsx")
+rownames(tCounts) <- make.names(tCounts[, 5], unique = TRUE)
+tCounts <- tCounts[, c(6, 9, 16, 20:37)]
+colnames(tCounts) <- c("Gene_ID", "Ensembl_Gene_ID", "Ensembl_Transcript_ID", sample_list)
+head(tCounts)
 
 
-scater::librarySizeFactors(transcriptCounts[, 4:9])
-scater::librarySizeFactors(transcriptCounts[, 10:15])
-scater::librarySizeFactors(transcriptCounts[, 16:21])
+colnames(tCounts)
+
+
+scater::librarySizeFactors(tCounts[, 4:9])
+scater::librarySizeFactors(tCounts[, 10:15])
+scater::librarySizeFactors(tCounts[, 16:21])
 
 # Differential expression analyses --------------------------------------------
 DE_genes <- list(
-  CD4T = run_DESeq2_humanOnly(geneCounts[, 1:6], "genes"),
-  CD8T = run_DESeq2_humanOnly(geneCounts[, 7:12], "genes"),
-  NK = run_DESeq2_humanOnly(geneCounts[, 13:18], "genes")
+  CD4T = run_DESeq2_humanOnly(gCounts[, 1:6], "genes"),
+  CD8T = run_DESeq2_humanOnly(gCounts[, 7:12], "genes"),
+  NK = run_DESeq2_humanOnly(gCounts[, 13:18], "genes")
 )
 
 DE_transcripts <- list(
-  CD4T = run_DESeq2_humanOnly(transcriptCounts[, 4:9], "transcripts"),
-  CD8T = run_DESeq2_humanOnly(transcriptCounts[, 10:15], "transcripts"),
-  NK = run_DESeq2_humanOnly(transcriptCounts[, 16:21], "transcripts")
+  CD4T = run_DESeq2_humanOnly(tCounts[, 4:9], "transcripts"),
+  CD8T = run_DESeq2_humanOnly(tCounts[, 10:15], "transcripts"),
+  NK = run_DESeq2_humanOnly(tCounts[, 16:21], "transcripts")
 )
 
 
@@ -59,8 +59,8 @@ write_DEGs_to_Excel(
 )
 
 
-transcript_info <- data.frame(rownames(transcriptCounts), transcriptCounts[, 1:3])
-colnames(transcript_info) <- c("Transcript_ID", "Gene_ID", "Ensembl_Gene_ID", "Ensembl_Transcript_ID")
+transcript_info <- data.frame(rownames(tCounts), tCounts[, 1:3])
+colnames(transcript_info) <- c("Transcript_ID", "Transcript", "Gene", "Ensembl_Gene_ID")
 head(transcript_info)
 
 write_DETs_to_Excel(
