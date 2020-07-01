@@ -4,7 +4,7 @@
 \alias{run_DAVID}
 \title{DAVID Gene Ontology Wrapper}
 \usage{
-run_DAVID(davidWS, DE_data, list_name, list_type)
+run_DAVID(davidWS, DE_data, list_name, list_type, overwrite_file)
 }
 \arguments{
 \item{davidWS}{A DAVIDWebService class object.}
@@ -14,10 +14,12 @@ run_DAVID(davidWS, DE_data, list_name, list_type)
 \item{list_name}{A string that will be used to identify the submitted list.}
 
 \item{list_type}{string. Either 'gene_symbol', 'gene_ID', or 'transcript_ID'}
+
+\item{overwrite_file}{logical}
 }
 \description{
 DAVID Gene Ontology Wrapper
 }
 \examples{
-run_DAVID(davidWS, DE_data, list_name, list_type)
+run_DAVID(davidWS, DE_data, list_name, list_type, overwrite_file)
 }

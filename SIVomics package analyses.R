@@ -43,12 +43,28 @@ library(RDAVIDWebService)
     NK = run_DESeq2(gCounts[, 13:18], sampleData, design, c(4), "gene")
   )
 
+  write_counts(
+    DESeq2::counts(DE_genes$CD4T$DESeq_object, normalized = TRUE),
+    DESeq2::counts(DE_genes$CD8T$DESeq_object, normalized = TRUE),
+    DESeq2::counts(DE_genes$NK$DESeq_object, normalized = TRUE),
+    sample_list, "Gene", "DESeq2 normalized gene counts.xlsx",
+    transcript_names = NULL
+  )
+
   write_DEGs_to_Excel(
     DE_genes$CD4T$filtered_results,
     DE_genes$CD8T$filtered_results,
     DE_genes$NK$filtered_results,
     "DEGs - DESeq2 LFC Shrinkage Method - human alignment.xlsx"
   )
+
+  write_DEGs_to_Excel(
+    DE_genes$CD4T$results,
+    DE_genes$CD8T$results,
+    DE_genes$NK$results,
+    "DEGs - DESeq2 LFC Shrinkage Method - unfiltered - human alignment.xlsx"
+  )
+
 
 
   DE_transcripts <- list(
@@ -57,9 +73,18 @@ library(RDAVIDWebService)
     NK = run_DESeq2(tCounts[, 16:21], sampleData, design, c(4), "transcript")
   )
 
+  write_counts(
+    DESeq2::counts(DE_transcripts$CD4T$DESeq_object, normalized = TRUE),
+    DESeq2::counts(DE_transcripts$CD8T$DESeq_object, normalized = TRUE),
+    DESeq2::counts(DE_transcripts$NK$DESeq_object, normalized = TRUE),
+    sample_list, "Transcript_ID", "DESeq2 normalized transcript counts.xlsx",
+    transcript_names = transcript_info[, 1:2]
+  )
+
+
   transcript_info <- data.frame(rownames(tCounts), tCounts[, 1:3])
   colnames(transcript_info) <- c(
-    "Ensembl_Transcript_ID" "Transcript_ID", "Gene_ID", "Ensembl_Gene_ID"
+    "Ensembl_Transcript_ID", "Transcript_ID", "Gene_ID", "Ensembl_Gene_ID"
   )
   head(transcript_info)
 

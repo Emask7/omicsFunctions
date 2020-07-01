@@ -4,7 +4,7 @@
 \alias{run_edgeR}
 \title{edgeR wrapper}
 \usage{
-run_edgeR(gene_counts, ortho_list, LFC_filter)
+run_edgeR(gene_counts)
 }
 \arguments{
 \item{gene_counts}{A data frame containing 6 columns of raw gene counts.}

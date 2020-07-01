@@ -5,6 +5,8 @@
 \title{Write DEG list to Excel file}
 \usage{
 write_DEGs_to_Excel(CD4T_res, CD8T_res, NK_res, file_name)
+
+write_DEGs_to_Excel(CD4T_res, CD8T_res, NK_res, file_name)
 }
 \arguments{
 \item{CD4T_res}{data.frame with columns 'Gene_ID', 'LFC', and 'padj'}
@@ -17,7 +19,10 @@ write_DEGs_to_Excel(CD4T_res, CD8T_res, NK_res, file_name)
 }
 \description{
 Write DEG list to Excel file
+
+Write DEG list to Excel file
 }
 \examples{
+write_DEGs_to_Excel(CD4T_res, CD8T_res, NK_res, file_name)
 write_DEGs_to_Excel(CD4T_res, CD8T_res, NK_res, file_name)
 }

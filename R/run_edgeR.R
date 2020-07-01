@@ -9,7 +9,7 @@
 #' @examples
 #' run_edgeR(gene_counts, ortho_list)
 
-run_edgeR <- function(gene_counts, ortho_list, LFC_filter) {
+run_edgeR <- function(gene_counts) {
 
   # Specify experimental design factors ---------------------------------------
     animal <- factor(c(rep(c("15979", "30760", "31151"), 2)))
@@ -44,8 +44,11 @@ run_edgeR <- function(gene_counts, ortho_list, LFC_filter) {
       p.adjust(lrtTreat$table$PValue, method = "fdr")
     )
     colnames(res) <- c("Gene_ID", "LFC", "padj")
+
+    res_filt <- subset(res, res$padj <= 0.05 & abs(res$LFC) >= 1)
+
     list(
       DGE_list = dgeList,
-      res = filter_DEG_table(res, ortho_list, LFC_filter)
+      res = res_filt
     )
 }

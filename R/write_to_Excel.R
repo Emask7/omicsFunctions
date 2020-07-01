@@ -159,3 +159,115 @@ get_term_DEGs <- function(GO_term, GO_dat, deg_dat, file_name, sheet_name, overw
 
   res
 }
+
+
+
+#' @title Write DEG list to Excel file
+#'
+#' @description Write DEG list to Excel file
+#' @param CD4T_res data.frame with columns 'Gene_ID', 'LFC', and 'padj'
+#' @param CD8T_res data.frame with columns 'Gene_ID', 'LFC', and 'padj'
+#' @param NK_res data.frame with columns 'Gene_ID', 'LFC', and 'padj'
+#' @param file_name string
+#' @export
+#' @examples
+#' write_DEGs_to_Excel(CD4T_res, CD8T_res, NK_res, file_name)
+
+write_DEGs_to_Excel <- function(CD4T_res, CD8T_res, NK_res, file_name) {
+  CD4T_summary <- get_DEG_number(CD4T_res)
+  CD8T_summary <- get_DEG_number(CD8T_res)
+  NK_summary <- get_DEG_number(NK_res)
+
+  DEG_summary <- data.frame(CD4T_summary, CD8T_summary, NK_summary)
+  colnames(DEG_summary) <- c("CD4T DEGs", "CD8T DEGs", "NK DEGs")
+
+  temp_CD4T <- CD4T_res
+  colnames(temp_CD4T) <- c("Gene_ID", "LFC_CD4T", "padj_CD4T")
+
+  temp_CD8T <- CD8T_res
+  colnames(temp_CD8T) <- c("Gene_ID", "LFC_CD8T", "padj_CD8T")
+
+  all_cell_res <- dplyr::full_join(temp_CD4T, temp_CD8T)
+
+  if (nrow(NK_res) > 0) {
+    temp_NK <- NK_res
+    colnames(temp_NK) <- c("Gene_ID", "LFC_NK", "padj_NK")
+
+    all_cell_res <- dplyr::full_join(all_cell_res, temp_NK)
+  }
+
+  wb <- createWorkbook(file_name)
+
+  addWorksheet(wb, "DEG Summary")
+  addWorksheet(wb, "All Cell Types")
+  addWorksheet(wb, "CD4T")
+  addWorksheet(wb, "CD8T")
+
+  writeData(wb, "DEG Summary", DEG_summary, rowNames = TRUE)
+  writeData(wb, "All Cell Types", all_cell_res)
+  writeData(wb, "CD4T", CD4T_res)
+  writeData(wb, "CD8T", CD8T_res)
+
+  if (nrow(NK_res) > 0) {
+    addWorksheet(wb, "NK")
+    writeData(wb, "NK", NK_res)
+  }
+
+  saveWorkbook(wb, file_name, overwrite = TRUE)
+}
+
+
+
+#' @title Write count data to Excel file
+#'
+#' @description Write count data to Excel file
+#' @param CD4T_res data.frame with gene or transcript count data
+#' @param CD8T_res data.frame with gene or transcript count data
+#' @param NK_res data.frame with gene or transcript count data
+#' @param sample_name_list list with sample names
+#' @param col_1_name string name of column 1
+#' @param file_name string
+#' @export
+#' @examples
+#' write_counts(CD4T_res, CD8T_res, NK_res, sample_name_list, col_1_name, file_name, transcript_names)
+
+write_counts <- function(CD4T_res, CD8T_res, NK_res, sample_name_list, col_1_name, file_name, transcript_names) {
+  CD4T_counts <- data.frame(rownames(CD4T_res), CD4T_res)
+  colnames(CD4T_counts) <- c(col_1_name, sample_name_list[1:6])
+
+  CD8T_counts <- data.frame(rownames(CD8T_res), CD8T_res)
+  colnames(CD8T_counts) <- c(col_1_name, sample_name_list[7:12])
+
+  NK_counts <- data.frame(rownames(NK_res), NK_res)
+  colnames(NK_counts) <- c(col_1_name, sample_name_list[13:18])
+
+  if (!is.null(transcript_names)) {
+    CD4T_counts <- dplyr::left_join(CD4T_counts, transcript_names, by = col_1_name)
+    CD4T_counts <- CD4T_counts[, c(8, 2:7)]
+
+    CD8T_counts <- dplyr::left_join(CD8T_counts, transcript_names, by = col_1_name)
+    CD8T_counts <- CD8T_counts[, c(8, 2:7)]
+
+    NK_counts <- dplyr::left_join(NK_counts, transcript_names, by = col_1_name)
+    NK_counts <- NK_counts[, c(8, 2:7)]
+  }
+
+  all_counts <- dplyr::full_join(CD4T_counts, CD8T_counts)
+  all_counts <- dplyr::full_join(all_counts, NK_counts)
+  head(all_counts)
+
+  wb <- createWorkbook(file_name)
+
+  addWorksheet(wb, "All Cell Types")
+  addWorksheet(wb, "CD4T")
+  addWorksheet(wb, "CD8T")
+  addWorksheet(wb, "NK")
+
+  writeData(wb, "All Cell Types", all_counts)
+  writeData(wb, "CD4T", CD4T_counts)
+  writeData(wb, "CD8T", CD8T_counts)
+  writeData(wb, "NK", NK_counts)
+
+  saveWorkbook(wb, file_name, overwrite = TRUE)
+}
+
