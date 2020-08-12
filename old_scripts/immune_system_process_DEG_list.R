@@ -1,5 +1,5 @@
 library(openxlsx)
-library(SIVomics)
+library(omicsFunctions)
 
 
 immune_process <- list(

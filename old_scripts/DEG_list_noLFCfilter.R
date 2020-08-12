@@ -1,4 +1,4 @@
-library(SIVomics)
+library(omicsFunctions)
 library(openxlsx)
 
 

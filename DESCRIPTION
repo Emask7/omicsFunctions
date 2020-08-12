@@ -1,4 +1,4 @@
-Package: SIVomics
+Package: omicsFunctions
 Type: Package
 Title: SIV in vivo Transcriptomics Analyses
 Version: 0.1.0

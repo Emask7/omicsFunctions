@@ -10,7 +10,8 @@ write_counts(
   NK_res,
   sample_name_list,
   col_1_name,
-  file_name
+  file_name,
+  transcript_names
 )
 }
 \arguments{
@@ -30,5 +31,5 @@ write_counts(
 Write count data to Excel file
 }
 \examples{
-write_counts(CD4T_res, CD8T_res, NK_res, sample_name_list, col_1_name, file_name)
+write_counts(CD4T_res, CD8T_res, NK_res, sample_name_list, col_1_name, file_name, transcript_names)
 }

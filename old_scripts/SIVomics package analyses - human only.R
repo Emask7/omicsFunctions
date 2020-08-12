@@ -1,7 +1,7 @@
 roxygen2::roxygenise()
 
 
-library(SIVomics)
+library(omicsFunctions)
 library(openxlsx)
 library(RDAVIDWebService)
 
