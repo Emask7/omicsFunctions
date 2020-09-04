@@ -9,7 +9,7 @@
 #' @import stringi
 #' @import RDAVIDWebService
 #' @examples
-#' run_FA(davidWS, annotation_cat, split_at, )
+#' run_FA(davidWS, annotation_cat, split_at, DE_data)
 
 run_FA <- function(davidWS, annotation_cat, split_at, DE_data) {
   setAnnotationCategories(davidWS, c(annotation_cat))
@@ -84,24 +84,28 @@ run_FA <- function(davidWS, annotation_cat, split_at, DE_data) {
 #' @import RDAVIDWebService
 #' @import openxlsx
 #' @import GOplot
+#' @import org.Hs.eg.db
 #' @export
 #' @examples
 #' run_DAVID(davidWS, DE_data, list_name, list_type, overwrite_file)
 
 run_DAVID <- function(davidWS, DE_data, list_name, list_type, overwrite_file) {
   # Make sure input is valid --------------------------------------------------
-    # DE_data <- subset.data.frame(DE_data, !grepl("ENSPANG", DE_data$Gene_ID))
+    DE_data <- subset.data.frame(DE_data, !grepl("ENSPANG", DE_data$Gene_ID))
 
     if (nrow(DE_data) < 1) {
       print("Error: input has 0 rows")
       return(NULL)
     }
-    if (colnames(DE_data)[2] != "LFC" | colnames(DE_data)[3] != "padj") {
+    else if (colnames(DE_data)[2] != "LFC" | colnames(DE_data)[3] != "padj") {
       print("Error: input must have 3 columns (Gene_ID or Transcript_ID, LFC, and padj)")
       return(NULL)
     }
-    if (!is.connected(david)) {
+    else if (!is.connected(davidWS)) {
       print("Error: not connected to RDAVIDWebService")
+      return(NULL)
+    } else {
+      print("Error")
       return(NULL)
     }
 
@@ -109,7 +113,7 @@ run_DAVID <- function(davidWS, DE_data, list_name, list_type, overwrite_file) {
     gene_lists <- getGeneListNames(davidWS)
     list_position <- 0
 
-    if (length(getGeneListNames(davidWS)) > 0) {
+    if (length(gene_lists) > 0) {
       for (x in 1:length(gene_lists)) {
         if (gene_lists[x] == list_name) list_position <- x
       }
@@ -118,7 +122,7 @@ run_DAVID <- function(davidWS, DE_data, list_name, list_type, overwrite_file) {
     if (list_position == 0) {
       if (list_type == "gene_symbol") {
         input_IDs <- AnnotationDbi::mapIds(
-          org.Hs.eg.db::org.Hs.eg.db, DE_data[, 1],
+          org.Hs.eg.db, DE_data[, 1],
           keytype = "SYMBOL", column = "ENSEMBL"
         )
         addList(

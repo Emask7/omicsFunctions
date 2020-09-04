@@ -5,18 +5,20 @@ Version: 0.1.0
 Author: Emma Mask
 Maintainer: Emma Mask <emask@txbiomed.org>
 Description: This package is a wrapper for analyses of SIV in vivo transcriptomics data using the edgeR and DESeq2 packages.
-License: still need to fill this section out
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Imports: 
-    BiocManager,
+    AnnotationDbi,
     BiocGenerics,
-    edgeR,
+    BiocManager,
     DESeq2,
     dplyr,
-    RDAVIDWebService,
-    AnnotationDbi,
+    edgeR,
+    GOplot,
     limma,
-    stringi,
-    openxlsx
-RoxygenNote: 7.1.0
+    org.Hs.eg.db,
+    openxlsx,
+    RDAVIDWebService,
+    stringi
+RoxygenNote: 7.1.1

@@ -22,6 +22,35 @@ Write DEG list to Excel file
 
 Write DEG list to Excel file
 }
+\details{
+#' @title Write list of DEGs mapped to a given GO term to an Excel file
+#'
+#' @description Write list of DEGs mapped to a given GO term to an Excel file
+#' @param GO_term a string containing the Gene Ontology term of interest
+#' @param GO_dat data.frame with Gene Ontology analysis results to be searched for the term specified by GO_term.
+#' Must include columns for at least 'term' and 'genes'.
+#' @param deg_dat data.frame with columns 'Gene_ID', 'LFC', and 'padj'
+#' @param file_name string
+#' @param sheet_name string
+#' @param overwrite_file logical
+#' @export
+#' @examples
+#' get_term_DEGs(GO_term, GO_dat, deg_dat, file_name, sheet_name, overwrite_file)
+
+get_term_DEGs <- function(GO_term, GO_dat, deg_dat, file_name, sheet_name, overwrite_file) {
+  res <- subset(GO_dat, GO_dat$term == GO_term)
+  res <- data.frame(res$term, res$genes)
+  colnames(res) <- c("Term", "Gene_ID")
+  res <- dplyr::left_join(res, deg_dat)
+
+  wb <- createWorkbook(file_name)
+  addWorksheet(wb, sheet_name)
+  writeData(wb, sheet_name, res)
+  saveWorkbook(wb, file_name, overwrite = overwrite_file)
+
+  res
+}
+}
 \examples{
 write_DEGs_to_Excel(CD4T_res, CD8T_res, NK_res, file_name)
 write_DEGs_to_Excel(CD4T_res, CD8T_res, NK_res, file_name)
